@@ -1,0 +1,13 @@
+{% extends "appCoder/padre.html" %}
+{% load static %}
+{% block contenidoQueCambia %}
+
+
+    {% for profesor in  listaDeProfesores %}
+
+        NOMBRE: {{profesor.nombre}}   APELLIDO: {{profesor.apellido}}     Email: {{profesor.email}}  Profesion: {{profesor.profesion}}<br><br><hr>
+
+    {% endfor %}
+    
+
+{% endblock %}
