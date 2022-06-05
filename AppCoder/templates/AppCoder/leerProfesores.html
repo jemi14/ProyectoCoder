@@ -1,0 +1,22 @@
+{% extends "appCoder/padre.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+
+<body>
+    {% for p in profesores %}
+
+        <li>{{p}}</li>
+
+        <button>
+            <a href="{% url 'EliminarProfesor' p.nombre %}"> Eliminar</a>></a>
+            <a href="{% url 'EditarProfesor' p.nombre %}"> Editar</a>></a>
+        </button>
+
+    {% endfor %}
+
+<!-- En este caso no funciona pero lo vamos a ver en las siguientes clases -->
+<a href="profesores"> Agregar otro profesor </a>
+</body>
+
+{% endblock %}
