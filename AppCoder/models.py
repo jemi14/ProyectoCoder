@@ -1,6 +1,10 @@
 from unittest.util import _MAX_LENGTH
 from django.db import models
 
+#---------------Clase 24-------------------------------
+from django.contrib.auth.models import User
+from django.db.models.fields.files import ImageField
+
 # Create your models here.
 
 class Curso(models.Model):
@@ -40,3 +44,9 @@ class Entregable(models.Model):
     def __str__(self):
         return f"Nombre: {self.nombre} - Fecha de entrega: {self.fechaDeEntrega} - Entregado: {self.entregado}"
 
+#---------------Clase 24-------------------------------
+class Avatar(models.Model):
+    #vinculo con el usuario
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    #Subcarpeta avatares de media :)
+    imagen = models.ImageField(upload_to='avatares', null=True, blank = True) 

@@ -13,6 +13,19 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
 from django.views.generic.edit import DeleteView
 
+#---------------Clase 23-------------------------------
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from AppCoder.forms import UserRegisterForm
+from django.contrib.auth.decorators import login_required
+
+#---------------Clase 24-------------------------------
+from AppCoder.forms import UserEditForm
+from AppCoder.models import Avatar
+from AppCoder.forms import AvatarFormulario
+from django.contrib.auth.models import User
+
 # Create your views here.
 
 def curso(request):
@@ -27,11 +40,15 @@ def curso(request):
     return HttpResponse(documentoDeTexto) #Http NO HTTP --- y poner from django.http import HttpResponse
 
 #---------------Clase 19-------------------------------
+#---------------Clase 24-------------------------------
 def inicio(request):
-    return render(request, "AppCoder/inicio.html")
+    avatar = Avatar.objects.filter(user=request.user.id)
+    return render(request, "AppCoder/inicio.html",{"imagen":avatar[0].imagen.url})
 
 #---------------Clase 21-------------------------------
+#---------------Clase 24-------------------------------
 def cursos(request):
+    avatar = Avatar.objects.filter(user=request.user.id)
     if request.method == 'POST':
 
         miFormulario = CursoFormulario(request.POST) #Aquí me llega todo la info del html
@@ -42,11 +59,11 @@ def cursos(request):
             informacion = miFormulario.cleaned_data
             curso = Curso (nombre=informacion['curso'], camada=informacion['camada'])
             curso.save()
-            return render(request, "AppCoder/inicio.html") #podes volver a donde quieras, si vuelve al inicio es por que salio todo bien :)
+            return render(request, "AppCoder/inicio.html", {"imagen":avatar[0].imagen.url}) #podes volver a donde quieras, si vuelve al inicio es por que salio todo bien :)
     else:
         miFormulario= CursoFormulario() #Formulario vacio para construir el html
 
-    return render(request, "AppCoder/cursoFormulario.html", {"miFormulario": miFormulario})
+    return render(request, "AppCoder/cursoFormulario.html", {"miFormulario": miFormulario, "imagen":avatar[0].imagen.url })
 
 #---------------Clase 22-------------------------------
 def profesores(request):
@@ -145,6 +162,8 @@ def buscar(request):
     return HttpResponse(respuesta)
 
 #---------------Clase 22-------------------------------
+#---------------Clase 23-------------------------------
+@login_required
 def leerProfesores(request):
     profesores = Profesor.objects.all() #Trae a todos los profesores
     contexto = {"profesores": profesores}
@@ -203,3 +222,80 @@ class CursoUpdate(UpdateView):
 class CursoDelete(DeleteView):
     model = Curso
     success_url = "/AppCoder/curso/list"
+
+#---------------Clase 23-------------------------------
+def login_request(request):
+    if request.method =="POST":
+        form = AuthenticationForm(request, data = request.POST)
+        if form.is_valid():
+            usuario = form.cleaned_data.get("username")
+            contra = form.cleaned_data.get("password")
+            user = authenticate(username=usuario, password = contra)
+            if user is not None:
+                login(request, user)
+                return render(request, "AppCoder/inicio.html", {"mensaje":f"BIENVENIDO, {usuario}!!!!"})
+            else:
+                return render(request, "AppCoder/inicio.html", {"mensaje":f"DATOS MALOS :(!!!!"})
+        else:
+            return render(request, "AppCoder/inicio.html", {"mensaje":f"FORMULARIO erroneo"})
+
+    form = AuthenticationForm()  #Formulario sin nada para hacer el login
+
+    return render(request, "AppCoder/login.html", {"form":form} )
+
+def register(request):
+      if request.method == 'POST':
+            #form = UserCreationForm(request.POST)
+            form = UserRegisterForm(request.POST)
+            if form.is_valid():
+                  username = form.cleaned_data['username']
+                  form.save()
+                  return render(request,"AppCoder/inicio.html" ,  {"mensaje":f"{username} Creado :)"})
+      else:
+            #form = UserCreationForm()     
+            form = UserRegisterForm()     
+
+      return render(request,"AppCoder/registro.html" ,  {"form":form})
+
+#---------------Clase 24-------------------------------
+@login_required
+def editarPerfil(request):
+    #Instancia del login
+    usuario = request.user
+
+    print("USUARIO: --->", usuario)
+    #Si es metodo POST hago lo mismo que el agregar
+    if request.method == 'POST':
+        miFormulario = UserEditForm(request.POST)
+
+        print(miFormulario)
+        if miFormulario.is_valid(): #Si pasó la validación de Django
+            informacion = miFormulario.cleaned_data
+            #Datos que se modificarán
+            usuario.email = informacion['email']
+            usuario.password1 = informacion['password1']
+            usuario.password2 = informacion['password2']
+            usuario.save()
+            return render(request, "AppCoder/inicio.html") #Vuelvo al inicio o a donde quieran
+    #En caso que no sea post
+    else:
+        print("Request: --->", request)
+        #Creo el formulario con los datos que voy a modificar
+        miFormulario = UserEditForm(initial={'email':usuario.email})
+        print("Mi Formulario: --->", miFormulario)
+    #Voy al html que me permite editar
+    print("Mi Formulario: --->", miFormulario)
+    return render(request, "AppCoder/editarPerfil.html", {"miFormulario":miFormulario, "usuario":usuario}) 
+
+@login_required
+def agregarAvatar(request):
+      if request.method == 'POST':
+            miFormulario = AvatarFormulario(request.POST, request.FILES) #aquí mellega toda la información del html
+            if miFormulario.is_valid():   #Si pasó la validación de Django
+                  u = User.objects.get(username=request.user)
+                  avatar = Avatar (user=u, imagen=miFormulario.cleaned_data['imagen']) 
+                  avatar.save()
+                  return render(request, "AppCoder/inicio.html") #Vuelvo al inicio o a donde quieran
+      else: 
+            miFormulario= AvatarFormulario() #Formulario vacio para construir el html
+      return render(request, "AppCoder/agregarAvatar.html", {"miFormulario":miFormulario})

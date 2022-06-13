@@ -17,7 +17,17 @@ from django.contrib import admin
 from django.urls import path, include
 from AppCoder.views import curso
 
+#----------------------------Clase 24-----------------------------
+from django.conf import settings
+from django.conf.urls.static import static
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('AppCoder/', include('AppCoder.urls'))
 ]
+
+#----------------------------Clase 24-----------------------------
+urlpatterns+= static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

@@ -1,0 +1,14 @@
+{% extends "appCoder/padre.html" %}
+{% load static %}
+{% block contenidoQueCambia %}
+
+<form method="POST" enctype="multipart/form-data">
+
+    {% csrf_token %}
+    {{ miFormulario.as_p }}
+
+    <input type="submit" value="Actualizar">
+
+</form>
+
+{% endblock %}

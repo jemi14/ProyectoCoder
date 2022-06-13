@@ -30,7 +30,16 @@
                 <li class="sidebar-nav-item"><a href="{% url 'Cursos' %}">Cursos</a></li>
                 <li class="sidebar-nav-item"><a href="{% url 'Estudiantes' %}">Estudiantes</a></li>
                 <li class="sidebar-nav-item"><a href="{% url 'Entregables' %}">Entregables</a></li>
-                <li class="btn btn-primary"><a href="#NadaAún">INICIAR</a></li>
+                <!-- Clase 24-->
+                {% if not request.user.is_authenticated %}
+                <li class="btn btn-primary"><a href="{% url 'Loguin' %}">INICIAR</a></li>
+                {% endif %}
+
+                {% if request.user.is_authenticated %}
+                <img src={{imagen}} width="20%">
+                <li class="sidebar-nav-item"><a href="">Hola, {{user.username}}!!!.</a></li>
+                {% endif %}
+                
             </ul>
         </nav>
         <!-- Header-->
